@@ -1,0 +1,20 @@
+{
+  "name": "reefer",
+  "version": "0.0.1",
+  "description": "Some motion library.",
+  "author": "fred mercy",
+  "main": "reefer.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hexanal/reefer.git"
+  },
+  "keywords": [
+    "animation",
+    "motion",
+    "frame"
+  ],
+  "bugs": {
+    "url": "https://github.com/hexanal/reefer/issues"
+  },
+  "homepage": "https://github.com/hexanal/reefer#readme"
+}

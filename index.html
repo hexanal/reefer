@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en-us">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<title>Reefer</title>
+	<meta name="description" content="Boom. Boom. Boom boom.">
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
+  <style>
+body {
+  margin: 0;
+  background-color: lavender;
+}
+
+.ball {
+  position: fixed;
+  z-index: -1;
+  width: 7rem;
+  height: 7rem;
+  background-color: deeppink;
+}
+
+.buttons {
+  position: fixed;
+  left: 50%;
+  bottom: 2rem;
+  z-index: 1;
+  padding: 1.5rem 1rem;
+  background-color: indigo;
+  transform: translateX(-50%);
+}
+.buttons button {
+  margin: 0 0.25rem;
+  padding: 0.5rem;
+  color: indigo;
+  font-family: monospace;
+  border: 2px solid deeppink;
+  background-color: lavender;
+  cursor: pointer;
+}
+.buttons button:hover {
+  color: white;
+  background-color: deeppink;
+}
+
+  </style>
+</head>
+
+<body>
+
+  <div class="ball"></div>
+
+  <div class="buttons">
+    <button type="button" class="btn-change-size">Change size</button>
+    <button type="button" class="btn-move-left">Move to the left</button>
+    <button type="button" class="btn-move-center">Move to the center</button>
+    <button type="button" class="btn-move-right">Move to the right</button>
+    <button type="button" class="btn-woosh">Woosh!</button>
+  </div>
+
+  <script type="module">
+
+import reefer from './reefer.js';
+
+const ball = document.querySelector('.ball');
+const btnChangeSize = document.querySelector('.btn-change-size');
+const btnMoveRight = document.querySelector('.btn-move-right');
+const btnMoveCenter = document.querySelector('.btn-move-center');
+const btnMoveLeft = document.querySelector('.btn-move-left');
+const btnWoosh = document.querySelector('.btn-woosh');
+
+const ballAnimParams = reefer({
+  x: 50,
+  y: 50,
+  rotate: 0,
+  radius: 50,
+  scale: 1,
+})
+  .onFrame(({x, y, rotate, radius, scale}) => {
+    ball.style.transform = `translate(-50%, -50%) rotate(${rotate}deg) scale(${scale})`;
+    ball.style.top = `${y}%`;
+    ball.style.left = `${x}%`;
+    ball.style.borderRadius = `${radius}%`;
+  });
+
+btnChangeSize.addEventListener('click', e => {
+  const scale = ballAnimParams.get().scale === 1 ? 7 : 1;
+  ballAnimParams.set({scale}, { stiffness: 100, damping: 10 });
+});
+btnMoveLeft.addEventListener('click', e => {
+  ballAnimParams.set({x: 25}, { stiffness: 100, damping: 10 });
+});
+btnMoveCenter.addEventListener('click', e => {
+  ballAnimParams.set({x: 50}, { stiffness: 100, damping: 10 });
+});
+btnMoveRight.addEventListener('click', e => {
+  ballAnimParams.set({x: 75}, { stiffness: 100, damping: 10 });
+});
+btnWoosh.addEventListener('click', e => {
+  const rotate = ballAnimParams.get().rotate === 0 ? 225 : 0;
+  const radius = ballAnimParams.get().radius === 0 ? 50 : 0;
+  ballAnimParams.set({ rotate, radius }, { stiffness: 80, damping: 13 });
+});
+
+  </script>
+
+</body>
+</html>
