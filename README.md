@@ -2,6 +2,8 @@
 
 A minimal library to make shit move.
 
+<video src="https://fredmercy.com/files/misc/reefer.webm"></video>
+
 It's also:
 
 1. a work in progress!
