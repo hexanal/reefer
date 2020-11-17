@@ -24,6 +24,7 @@ Or if you know how to manage that, use the github repo as a dependency in your `
 
 ## Roadmap
 
+- figure out a gif or whatever Github accepts to display on a README? gotta figure out everything, man...!
 - clean up the codebase
 - improve the demo page
 - use a better nomenclature
