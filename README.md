@@ -2,7 +2,7 @@
 
 A minimal library to make shit move.
 
-<video src="https://fredmercy.com/files/misc/reefer.webm"></video>
+<video><source src="https://fredmercy.com/files/misc/reefer.webm" type="video/webm"></video>
 
 It's also:
 
