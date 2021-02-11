@@ -1,107 +1,67 @@
-import stepper from './stepper.js';
+import stepper from './stepper.js'
 
-const REST_FRAMES_THRESHOLD = 50;
+// TODO how to dispose of the callbacks?
+export function onFrame(fn, timestamp = 0) {
+  fn(timestamp)
+
+  requestAnimationFrame( function(timestamp) {
+    onFrame(fn, timestamp)
+  } )
+}
 
 // TODO extract reefer to be targeting ONE prop at a time; while running the raf?
-export default function reefer(initialProps, initialSpring = { stiffness: 250, damping: 25 }) {
-  const frameCallbacks = [];
-  const endCallbacks = [];
-  const interpolated = { ...initialProps };
-  const props = { ...initialProps };
-  const springPerProp = Object.keys(props).reduce((acc, key) => {
-    acc[key] = { ...initialSpring };
-    return acc;
-  }, {});
+export default function reefer(startWith = 0) {
+  // in state object instead?
+  let target = startWith
+  let interpolated = startWith
+  let currentVelocity = 0
+  let spring = { stiffness: 250, damping: 25 }
 
-  Object.keys(props).forEach(key => {
-    framer(key, props[key], interpolated[key]);
-  });
+  // init
+  onFrame( () => framer(target, interpolated, currentVelocity) )
 
-  function framer(key, target, start = 0, velocity = 0) {
-    if (typeof target === 'string') return;
-    if (typeof target !== 'number') return;
-    if (typeof start !== 'number') return;
+  // on every frame, do this
+  function framer(target, start = 0, velocity = 0) {
+    if (typeof target !== 'number' || typeof start !== 'number') return
 
-    const [nextValue, nextVelocity] = stepper(
-      start,
-      velocity,
-      target,
-      springPerProp[key].stiffness,
-      springPerProp[key].damping
-    );
+    const [nextValue, nextVelocity] = stepper( start, velocity, target, spring.stiffness, spring.damping )
 
-    interpolated[key] = nextValue;
-
-    const progress = Math.min(1, start / target);
-    frameCallbacks.map(fn => fn(interpolated, progress) );
-
-    // if ( "AT REST ") {
-    //   endCallbacks.map(fn => fn(key) );
-    // }
-
-    requestAnimationFrame(function() {
-      framer(key, props[key], nextValue, nextVelocity);
-    });
+    interpolated = nextValue
+    currentVelocity = nextVelocity
   }
 
-  function run({newProps, spring, useRelativeValues}) {
-    Object.keys(newProps).forEach(key => {
-      if ( typeof newProps[key] !== 'number' ) {
-        // treat as simple variable
-        interpolated[key] = newProps[key];
-        return;
-      }
+  function set(newTarget, newSpring) {
+    if ( typeof newTarget !== 'number' ) {
+      interpolated = newTarget
+      return
+    }
 
-      springPerProp[key].restStack = []; // reset the rest stack...
+    if ( newSpring ) spring = { ...newSpring }
 
-      if ( spring ) {
-        springPerProp[key].stiffness = spring.stiffness; // set new spring config
-        springPerProp[key].damping = spring.damping;
-      }
+    target = newTarget
 
-      props[key] = useRelativeValues
-        ? props[key] + newProps[key]
-        : newProps[key];
-    });
+    return methods
+  }
 
-    return methods;
+  function get() {
+    return interpolated
   }
 
   const methods = {
-    get: () => props,
+    set,
+    get,
 
-    getInterpolated: () => interpolated,
+    getCurrentTarget: () => target,
 
-    instantSet: props => {
-      Object.keys(props).forEach(key => {
-        interpolated[key] = props[key];
-      });
+    instantSet: value => {
+      target = value
+      interpolated = value
     },
 
-    set: (props, config) => run({
-      newProps: props,
-      spring: config
-    }),
+    // withSpring?
+    // withInertia? // acceleration?
+    // withCubicBezier // change in acceleration?!!??!
+  }
 
-    relative: {
-      set: (props, config) => run({
-        newProps: props,
-        spring: config,
-        useRelativeValues: true
-      }),
-    },
-
-    onFrame: fn => {
-      fn(interpolated);
-      frameCallbacks.push(fn);
-      return methods;
-    },
-
-    // onEnd: fn => {
-    //   endCallbacks.push(fn);
-    //   return methods;
-    // },
-  };
-
-  return methods;
-};
+  return methods
+}

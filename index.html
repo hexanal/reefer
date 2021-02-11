@@ -51,56 +51,73 @@ body {
   <div class="ball"></div>
 
   <div class="buttons">
-    <button type="button" class="btn-change-size">Change size</button>
-    <button type="button" class="btn-move-left">Move to the left</button>
-    <button type="button" class="btn-move-center">Move to the center</button>
-    <button type="button" class="btn-move-right">Move to the right</button>
-    <button type="button" class="btn-woosh">Woosh!</button>
+    <button type="button" class="btn-change-size">big/small</button>
+    <button type="button" class="btn-move-left">to left</button>
+    <button type="button" class="btn-move-center"><em>immediately</em> to center</button>
+    <button type="button" class="btn-move-right">to right</button>
+    <button type="button" class="btn-woosh"><em>woosh!</em></button>
+    <button type="button" class="btn-wobble">toggle wobble</button>
   </div>
 
   <script type="module">
 
-import reefer from './reefer.js';
+import reefer, { onFrame } from './reefer.js'
 
-const ball = document.querySelector('.ball');
-const btnChangeSize = document.querySelector('.btn-change-size');
-const btnMoveRight = document.querySelector('.btn-move-right');
-const btnMoveCenter = document.querySelector('.btn-move-center');
-const btnMoveLeft = document.querySelector('.btn-move-left');
-const btnWoosh = document.querySelector('.btn-woosh');
+const ball = document.querySelector('.ball')
+const btnChangeSize = document.querySelector('.btn-change-size')
+const btnMoveRight = document.querySelector('.btn-move-right')
+const btnMoveCenter = document.querySelector('.btn-move-center')
+const btnMoveLeft = document.querySelector('.btn-move-left')
+const btnWoosh = document.querySelector('.btn-woosh')
+const btnWobble = document.querySelector('.btn-wobble')
 
-const ballAnimParams = reefer({
-  x: 50,
-  y: 50,
-  rotate: 0,
-  radius: 50,
-  scale: 1,
+const state = {
+  x: reefer(50),
+  y: reefer(50),
+  rotate: reefer(0),
+  scale: reefer(1),
+  radius: reefer(50),
+  wobble: reefer(1),
+  fuck: 'me'
+}
+
+const AMPLITUDE = 10
+const FREQ_MULTIPLIER = 0.005
+
+onFrame( frame => {
+  const freq = Math.sin( frame * FREQ_MULTIPLIER )
+  const amplitude = state.wobble.get() * AMPLITUDE
+  const y = state.y.get() + (freq * amplitude)
+
+  ball.style.transform = `translate(-50%, -50%) rotate(${state.rotate.get()}deg) scale(${state.scale.get()})`
+  ball.style.top = `${y}%`
+  ball.style.left = `${state.x.get()}%`
+  ball.style.borderRadius = `${state.radius.get()}%`
 })
-  .onFrame(({x, y, rotate, radius, scale}) => {
-    ball.style.transform = `translate(-50%, -50%) rotate(${rotate}deg) scale(${scale})`;
-    ball.style.top = `${y}%`;
-    ball.style.left = `${x}%`;
-    ball.style.borderRadius = `${radius}%`;
-  });
 
 btnChangeSize.addEventListener('click', e => {
-  const scale = ballAnimParams.get().scale === 1 ? 7 : 1;
-  ballAnimParams.set({scale}, { stiffness: 100, damping: 10 });
-});
+  state.scale.set( state.scale.getCurrentTarget() === 1 ? 7 : 1, { stiffness: 300, damping: 15 })
+})
 btnMoveLeft.addEventListener('click', e => {
-  ballAnimParams.set({x: 25}, { stiffness: 100, damping: 10 });
-});
+  state.x.set(25, { stiffness: 400, damping: 15 })
+})
 btnMoveCenter.addEventListener('click', e => {
-  ballAnimParams.set({x: 50}, { stiffness: 100, damping: 10 });
-});
+  state.x.instantSet(50)
+})
 btnMoveRight.addEventListener('click', e => {
-  ballAnimParams.set({x: 75}, { stiffness: 100, damping: 10 });
-});
+  state.x.set(75, { stiffness: 400, damping: 15 })
+})
+btnWobble.addEventListener('click', e => {
+  const wobb = state.wobble.getCurrentTarget() === 1 ? 0 : 1
+  state.wobble.set(wobb, { stiffness: 300, damping: 20 })
+})
 btnWoosh.addEventListener('click', e => {
-  const rotate = ballAnimParams.get().rotate === 0 ? 225 : 0;
-  const radius = ballAnimParams.get().radius === 0 ? 50 : 0;
-  ballAnimParams.set({ rotate, radius }, { stiffness: 80, damping: 13 });
-});
+  const rotate = state.rotate.getCurrentTarget() === 0 ? 135 : 0
+  const radius = state.radius.getCurrentTarget() === 0 ? 50 : 0
+
+  state.rotate.set(rotate, { stiffness: 200, damping: 17 })
+  state.radius.set(radius, { stiffness: 300, damping: 20 })
+})
 
   </script>
 
