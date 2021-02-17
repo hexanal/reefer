@@ -39,8 +39,6 @@ export default function reefer(startWith = 0) {
     if ( newSpring ) spring = { ...newSpring }
 
     target = newTarget
-
-    return methods
   }
 
   function get() {
@@ -48,6 +46,11 @@ export default function reefer(startWith = 0) {
   }
 
   const methods = {
+    setSpring: newSpringConfig => {
+      spring = { ...newSpringConfig }
+      return methods
+    },
+
     set,
     get,
 
